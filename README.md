@@ -13,7 +13,7 @@ station wlan0 connect SSID
 ```bash
 curl https://wuyanghao.github.io/archlinux/install.sh > install.sh
 ```
-4. run my script
+4. run my script(just need choose a disk)
 ```bash
 bash install.sh
 ```
