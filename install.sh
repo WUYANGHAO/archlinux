@@ -137,8 +137,9 @@ EOF
 
 # reboot
 function Reboot(){
-    echo "Will reboot now"
+    echo "Will reboot in ten seconds"
     echo "use user 'arch' passwd 'arch' login system"
+    sleep(10)
     umount -R /mnt
     reboot
 }
