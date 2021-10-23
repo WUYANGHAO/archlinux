@@ -1,4 +1,4 @@
-# archlinux
+# One Click Install Arch
 
 1. boot from ISO
 
