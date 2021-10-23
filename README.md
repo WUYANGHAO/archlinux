@@ -6,5 +6,9 @@
 
 3. get my script
 ```bash
-curl -X 
+curl https://wuyanghao.github.io/archlinux/install.sh > install.sh
+```
+4. run my script
+```bash
+bash install.sh
 ```
