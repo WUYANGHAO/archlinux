@@ -2,7 +2,7 @@
 
 1. boot from ISO
 
-2. connect network
+2. connect network(wifi)
 ```bash
 iwctl
 device list
