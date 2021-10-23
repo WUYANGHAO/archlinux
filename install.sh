@@ -67,7 +67,7 @@ function SetDisk(){
 
     # format partition
     mkfs.fat -F32 ${DISK}1
-    mkfs -t ext4 ${DISK}2
+    echo -e "y\n" | mkfs -t ext4 ${DISK}2
 
     # mount partition
     mount -v ${DISK}2 /mnt
@@ -87,6 +87,61 @@ function InstallBase(){
     genfstab -U /mnt >> /mnt/etc/fstab
 }
 
+# config in chroot
+function ConfigChroot(){
+arch-chroot /mnt <<EOF
+# set time none
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+hwclock --systohc
+
+# set locale
+sed -i "s/^#en_US.UTF-8/en_US.UTF-8/g" /etc/locale.gen
+sed -i "s/^#zh_CN.UTF-8/zh_CN.UTF-8/g" /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+# set hostname hosts
+echo "MYARCH" > /etc/hostname
+echo "127.0.0.1	localhost" >> /etc/hosts
+echo "::1		localhost" >> /etc/hosts
+
+# install require 
+yes | pacman -S iwd networkmanager grub efibootmgr intel-ucode
+systemctl enable systemd-networkd.service
+systemctl enable systemd-resolved.service
+systemctl enable NetworkManager
+systemctl enable iwd
+echo -e "[Match]\nName=wlan0\n[Network]\nDHCP=ipv4" > /etc/systemd/network/0-wireless.network
+echo -e "[Match]\nName=eno1\n[Network]\nDHCP=ipv4" > /etc/systemd/network/0-wired.network
+echo -e "root\nroot\n" | passwd root
+
+# install bootleader
+grub-install --target=x86_64-efi --efi-directory=/EFI --bootloader-id=GRUB
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# create user
+useradd -m -G wheel -s /bin/bash "arch"
+echo "LANG=zh_CN.UTF-8" > /home/arch/.config/locale.conf
+echo -e "arch\narch\n" | passwd arch
+yes | pacman -S sudo
+sed -i "s/# %wheel  ALL=(ALL) ALL/%wheel  ALL=(ALL) ALL/g" /etc/sudoers
+
+# install desktop
+yes | pacman -S xf86-video-intel cups bluez gnome-software-packagekit-plugin bash-completion wqy-microhei opendesktop-fonts
+echo -e "\n\n\n" | pacman -Sy gnome
+systemctl enable gdm
+systemctl enable cups
+systemctl enable bluetooth
+EOF
+}
+
+# reboot
+function Reboot(){
+    echo "Will reboot now"
+    echo "use user 'arch' passwd 'arch' login system"
+    umount -R /mnt
+    reboot
+}
 
 # main
 CheckNet
@@ -94,4 +149,5 @@ SetNtp
 SetDisk
 SetMirror
 InstallBase
-
+ConfigChroot
+Reboot
