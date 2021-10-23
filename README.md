@@ -1,6 +1,6 @@
 # One Click Install Arch
 
-1. boot from ISO
+1. boot from arch ISO
 
 2. connect network(wifi)
 ```bash
